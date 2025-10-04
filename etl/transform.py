@@ -1,29 +1,35 @@
 import pandas as pd
 import json
+import os
 
+input_folder = "extracted_data"
+output_folder = "new_column_data"
+os.makedirs(output_folder, exist_ok=True)
 
-# read the json file and organize data into columns``
-with open('raw_data/AAPL_2025_10-04.json') as f:
-    data = json.load(f)
+filenames = ['AAPL_2025-10-04.json', 'GOOG_2025-10-04.json', 'MSFT_2025-10-04.json']
 
-time_series = data['Time Series (5min)']
-df = pd.DataFrame.from_dict(time_series, orient='index')
+for file in filenames:
+    input_path = os.path.join(input_folder, file)
+    
+    with open(input_path, 'r') as f:
+        data = json.load(f)
 
-df.columns = [
-    'open', 'high', 'low', 'close', 'volume'
-]
+    time_series = data['Time Series (Daily)']
 
-df = df.reset_index().rename(columns={'index': 'date'})
+    df = pd.DataFrame.from_dict(time_series, orient='index')
 
-df['date'] = pd.to_datetime(df['date'])
-df[['open', 'high', 'low', 'close', 'volume']] = df[['open', 'high', 'low', 'close', 'volume']].astype(float)
-df["volume"] = df["volume"].astype(int)
+    df.columns = ['open', 'high', 'low', 'close', 'volume']
 
-# print(df)
+    df = df.reset_index().rename(columns={'index': 'date'})
 
-# add the new columns
-df['daily_change_percentage'] = (df['close'] - df['open'])/df['open'] * 100
-print(df)
+    df['date'] = pd.to_datetime(df['date'])
+    df[['open', 'high', 'low', 'close']] = df[['open', 'high', 'low', 'close']].astype(float)
+    df['volume'] = df['volume'].astype(int)
 
-# save the transformed data to a new json file
-df.to_json('raw_data/AAPL_with_new_column.json', orient='records', indent=4, date_format='iso')
+    df['daily_change_percentage'] = ((df['close'] - df['open']) / df['open']) * 100
+
+    output_filename = file.replace('.json', '_cleaned.tsv')
+    output_path = os.path.join(output_folder, output_filename)
+    df.to_csv(output_path, sep='\t', index=False, float_format='%.2f')
+
+    print(f"{file} -> {output_path}")
