@@ -2,7 +2,7 @@ import pandas as pd
 import pyodbc
 
 server = 'FELINISY'
-database = 'Daily Stocks'
+database = 'Daily_Stocks'
 driver = '{ODBC Driver 17 for SQL Server}'
 
 conn = pyodbc.connect(
