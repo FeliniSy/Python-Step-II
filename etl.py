@@ -1,4 +1,5 @@
 import pandas as pd
+import psycopg2
 import requests
 from pathlib import Path
 import json
@@ -8,7 +9,8 @@ from datetime import date
 
 class ETL:
 
-    def _extract_from_api(self, name):
+    @staticmethod
+    def extract_from_api(name):
         url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={name}&apikey=={API_KEY}"
         r = requests.get(url)
         data = r.json()
@@ -22,7 +24,8 @@ class ETL:
         with file_path.open("w") as f1:
             json.dump(data, f1, indent=4)
 
-    def _transform(self):
+    @staticmethod
+    def transform():
         input_folder = "updated_extracted_data/"
         output_folder = "updated_newcolumndata/"
         os.makedirs(output_folder, exist_ok=True)
@@ -54,50 +57,52 @@ class ETL:
             
             print(f"{file} -> {output_path}")
 
-    # def _load(self):
-    #     input_folder = "updated_newcolumndata/"
-    #     fileList = os.listdir(input_folder)
-    #
-    #     cur =  CONN.cursor()
-    #     cur.execute('''
-    #     IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='stock_daily_data' AND xtype='U')
-    #     BEGIN
-    #         CREATE TABLE stock_daily_data (
-    #             id INT SERIAL PRIMARY KEY,
-    #             symbol VARCHAR(10),
-    #             date DATE,
-    #             open_price FLOAT,
-    #             high_price FLOAT,
-    #             low_price FLOAT,
-    #             close_price FLOAT,
-    #             volume BIGINT,
-    #             daily_change_percentage FLOAT,
-    #             extraction_timestamp DATETIME DEFAULT NOW(),
-    #             CONSTRAINT UQ_stock_date UNIQUE(symbol, date)
-    #         )
-    #     END
-    #     ''')
-    #     CONN.commit()
-    #
-    #     for file in fileList:
-    #         input_path = os.path.join(input_folder,file)
-    #         df = pd.read_csv(input_path,sep='\t')
-    #
-    #         symbol = file.split('_')[0]
-    #         df['symbol'] = symbol
-    #
-    #         for index, row in df.iterrows():
-    #             try:
-    #                 cur.execute('''
-    #                     INSERT INTO stock_daily_data
-    #                     (symbol, date, open_price, high_price, low_price, close_price, volume, daily_change_percentage)
-    #                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    #                 ''', row['symbol'], row['date'], row['open'], row['high'], row['low'], row['close'],
-    #                                row['volume'], row['daily_change_percentage'])
-    #             except psycopg2.IntegrityError:
-    #                 pass
-    #
-    #         CONN.commit()
-    #         print(f"Inserted data from {file}")
-    #
-    #     CONN.close()
+    @staticmethod
+    def load():
+        input_folder = "updated_newcolumndata/"
+        fileList = os.listdir(input_folder)
+
+        conn = psycopg2.connect(CONN)
+        cur =  conn.cursor()
+        cur.execute('''
+        IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='stock_daily_data' AND xtype='U')
+        BEGIN
+            CREATE TABLE stock_daily_data (
+                id INT SERIAL PRIMARY KEY,
+                symbol VARCHAR(10),
+                date DATE,
+                open_price FLOAT,
+                high_price FLOAT,
+                low_price FLOAT,
+                close_price FLOAT,
+                volume BIGINT,
+                daily_change_percentage FLOAT,
+                extraction_timestamp DATETIME DEFAULT NOW(),
+                CONSTRAINT UQ_stock_date UNIQUE(symbol, date)
+            )
+        END
+        ''')
+        CONN.commit()
+
+        for file in fileList:
+            input_path = os.path.join(input_folder,file)
+            df = pd.read_csv(input_path,sep='\t')
+
+            symbol = file.split('_')[0]
+            df['symbol'] = symbol
+
+            for index, row in df.iterrows():
+                try:
+                    cur.execute('''
+                        INSERT INTO stock_daily_data
+                        (symbol, date, open_price, high_price, low_price, close_price, volume, daily_change_percentage)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    ''', row['symbol'], row['date'], row['open'], row['high'], row['low'], row['close'],
+                                   row['volume'], row['daily_change_percentage'])
+                except psycopg2.IntegrityError:
+                    pass
+
+            CONN.commit()
+            print(f"Inserted data from {file}")
+
+        CONN.close()
