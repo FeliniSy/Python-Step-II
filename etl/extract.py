@@ -1,6 +1,12 @@
 import requests
 import json
-
+# TODO:
+#   Learn about environment variables and how to use a .env file.
+#  Create a file named settings.py (for example) and import your environment variables there.
+#    You’ll then be able to access them anywhere in your project.
+#  Implement a function that accepts an argument and, based on that argument,
+#    extracts data from an API.
+#  The timestamp should be generated dynamically instead of being static.
 # data for MSFT
 url1 = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=MSFT&apikey==ninisKey'
 r1 = requests.get(url1)

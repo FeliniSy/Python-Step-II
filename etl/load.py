@@ -2,7 +2,13 @@ import pandas as pd
 import pyodbc
 import os
 from datetime import datetime
-server = 'FELINISY'
+
+#TODO:
+#   Create this variables in Settings py and import from that file.
+#   Refactor the current implementation into a DatabaseManager class
+#    that handles all database-related operations.
+#    Separate the logic into functions (e.g., connect, insert, fetch, close, etc.)
+
 database = 'Daily_Stocks'
 driver = '{ODBC Driver 17 for SQL Server}'
 

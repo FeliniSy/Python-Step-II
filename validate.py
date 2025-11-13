@@ -15,7 +15,8 @@ raw_data = [
     {"date": "2025-10-02", "open": "wrong_value", "high": 186.50, "low": 184.00,
      "close": 185.10, "volume": 43219876, "daily_change_percentage": -0.48}
 ]
-
+#TODO:
+# This validation should be applied during extraction. When u request data from Api, response should be validated with that class.
 for record in raw_data:
     try:
         validated = StockData(**record)

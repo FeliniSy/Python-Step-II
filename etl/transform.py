@@ -1,7 +1,8 @@
 import pandas as pd
 import json
 import os
-
+#TODO:
+# That should be modified for a Class. Transformer class with that transforming logic within seperated functions
 input_folder = "extracted_data"
 output_folder = "new_column_data"
 os.makedirs(output_folder, exist_ok=True)
