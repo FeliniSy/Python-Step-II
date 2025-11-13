@@ -1,7 +1,7 @@
 import requests
 import json
-from dotenv import load_dotenv
-import os
+from settings import API_KEY
+
 # TODO:
 #   Learn about environment variables and how to use a .env file.
 #  Create a file named settings.py (for example) and import your environment variables there.
@@ -10,12 +10,10 @@ import os
 #    extracts data from an API.
 #  The timestamp should be generated dynamically instead of being static.
 
-#API_KEY
-load_dotenv()
-api_key = os.getenv("API_KEY")
+APIKEY=API_KEY
 
 # data for MSFT
-url1 = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=MSFT&apikey==api_key'
+url1 = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=MSFT&apikey==APIKEY'
 r1 = requests.get(url1)
 data1 = r1.json()
 
@@ -25,7 +23,7 @@ with open("extracted_data\MSFT_2025-10-04.json", "w") as f1:
     json.dump(data1, f1, indent=4)
 
 # data for GOOG
-url2 = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=GOOG&apikey==api_key'
+url2 = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=GOOG&apikey==APIKEY'
 r2 = requests.get(url2)
 data2 = r2.json()
 
@@ -36,7 +34,7 @@ with open("extracted_data\GOOG_2025-10-04.json", "w") as f2:
 
 
 # data for AAPL
-url3 = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=AAPL&apikey==api_key'
+url3 = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=AAPL&apikey==APIKEY'
 r3 = requests.get(url3)
 data3 = r3.json()
 
