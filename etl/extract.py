@@ -1,7 +1,3 @@
-import requests
-import json
-from settings import API_KEY
-
 # TODO:
 #   Learn about environment variables and how to use a .env file.
 #  Create a file named settings.py (for example) and import your environment variables there.
@@ -10,35 +6,45 @@ from settings import API_KEY
 #    extracts data from an API.
 #  The timestamp should be generated dynamically instead of being static.
 
-APIKEY=API_KEY
+import requests
+from datetime import date
+from pydantic import ValidationError
 
-# data for MSFT
-url1 = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=MSFT&apikey==APIKEY'
-r1 = requests.get(url1)
-data1 = r1.json()
+from settings import *
+import pandas as pd
 
-# print(data)
+from validate import Validate
 
-with open("extracted_data\MSFT_2025-10-04.json", "w") as f1:
-    json.dump(data1, f1, indent=4)
+df = None
 
-# data for GOOG
-url2 = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=GOOG&apikey==APIKEY'
-r2 = requests.get(url2)
-data2 = r2.json()
+def extract(value):
+    global df
 
-# print(data)
+    url = URL.format(value,API_KEY)
+    r = requests.get(url)
 
-with open("extracted_data\GOOG_2025-10-04.json", "w") as f2:
-    json.dump(data2, f2, indent=4)
+    data = r.json()
+    time_series = data['Time Series (Daily)']
 
+    validated_row = []
 
-# data for AAPL
-url3 = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=AAPL&apikey==APIKEY'
-r3 = requests.get(url3)
-data3 = r3.json()
+    for date_key, row in time_series.items():
+        try:
+            validate = Validate(date=date_key,**row)
+            validated_row.append(validate.model_dump())
+        except ValidationError as e:
+            print(e)
 
-# print(data)
+    validated_df = pd.DataFrame(validated_row)
 
-with open("extracted_data\AAPL_2025-10-04.json", "w") as f3:
-    json.dump(data3, f3, indent=4)
+    # validated_data = Validation(data)
+    if df is None:
+        df = pd.DataFrame.from_dict(time_series, orient='index') # for the first time add
+    else:
+        df = pd.concat([df,data],ignore_index=True) # after just add other dataframes
+
+    ct = date.today()
+    df.to_csv(f"extracted_data/{value}_{ct}.csv")
+    # print(df)
+
+    return df

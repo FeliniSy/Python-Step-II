@@ -45,7 +45,6 @@ for file in filenames:
     input_path = os.path.join(input_folder, file)
 
     df = pd.read_csv(input_path, sep='\t')
-
     symbol = file.split('_')[0]
     df['symbol'] = symbol
 
@@ -68,3 +67,11 @@ for file in filenames:
 # df_sql.to_json("raw_data/stock_daily_data_export.json", orient="records", indent=4, date_format='iso')
 
 conn.close()
+
+class A:
+    def __init__(self):
+        pass
+
+    @property
+    def conn(self):
+        return

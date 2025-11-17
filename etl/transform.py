@@ -1,36 +1,42 @@
-import pandas as pd
-import json
 import os
+import pandas as pd
+
 #TODO:
 # That should be modified for a Class. Transformer class with that transforming logic within seperated functions
-input_folder = "extracted_data"
-output_folder = "new_column_data"
-os.makedirs(output_folder, exist_ok=True)
 
-filenames = ['AAPL_2025-10-04.json', 'GOOG_2025-10-04.json', 'MSFT_2025-10-04.json']
+class Transform:
+    def __init__(self,df):
+        self._df = df
 
-for file in filenames:
-    input_path = os.path.join(input_folder, file)
-    
-    with open(input_path, 'r') as f:
-        data = json.load(f)
+    def _column_name(self): #for column
 
-    time_series = data['Time Series (Daily)']
+        if not isinstance(self._df,pd.DataFrame):
+            self._df = pd.DataFrame(self._df)
 
-    df = pd.DataFrame.from_dict(time_series, orient='index')
+        self._df.columns = ['open', 'high', 'low', 'close', 'volume']
+        self._df = self._df.reset_index().rename(columns={'index': 'date'})
+        self._df['date'] = pd.to_datetime(self._df['date'])
+        self._df[['open', 'high', 'low', 'close']] = self._df[['open', 'high', 'low', 'close']].astype(float)
+        self._df['volume'] = self._df['volume'].astype(int)
 
-    df.columns = ['open', 'high', 'low', 'close', 'volume']
 
-    df = df.reset_index().rename(columns={'index': 'date'})
+    def _add_new_column(self):
+        self._df['daily_change_percentage'] = ((self._df['close'] - self._df['open']) / self._df['open']) * 100
 
-    df['date'] = pd.to_datetime(df['date'])
-    df[['open', 'high', 'low', 'close']] = df[['open', 'high', 'low', 'close']].astype(float)
-    df['volume'] = df['volume'].astype(int)
 
-    df['daily_change_percentage'] = ((df['close'] - df['open']) / df['open']) * 100
+    def _keep_in_folder(self,filename="output.csv"):
 
-    output_filename = file.replace('.json', '_cleaned.tsv')
-    output_path = os.path.join(output_folder, output_filename)
-    df.to_csv(output_path, sep='\t', index=False, float_format='%.2f')
+        if not isinstance(self._df,pd.DataFrame):
+            self._df = pd.DataFrame(self._df)
+        output_folder = "transformed/"
 
-    print(f"{file} -> {output_path}")
+        os.makedirs(output_folder,exist_ok=True)
+
+        output_path = os.path.join(output_folder,filename)
+
+        self._df.to_csv(output_path,sep='\t',index=False,float_format='%.2f')
+
+    def tranform_data(self):
+        self._column_name()
+        self._add_new_column()
+        self._keep_in_folder()

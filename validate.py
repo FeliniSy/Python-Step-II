@@ -1,25 +1,10 @@
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, ValidationError, Field
 
-class StockData(BaseModel):
+
+class Validate(BaseModel):
     date: str
-    open: float
-    high: float
-    low: float
-    close: float
-    volume: int
-    daily_change_percentage: float
-
-raw_data = [
-    {"date": "2025-10-03", "open": 184.23, "high": 185.44, "low": 182.61,
-     "close": 183.45, "volume": 55432123, "daily_change_percentage": -0.42},
-    {"date": "2025-10-02", "open": "wrong_value", "high": 186.50, "low": 184.00,
-     "close": 185.10, "volume": 43219876, "daily_change_percentage": -0.48}
-]
-#TODO:
-# This validation should be applied during extraction. When u request data from Api, response should be validated with that class.
-for record in raw_data:
-    try:
-        validated = StockData(**record)
-        print("Valid:", validated)
-    except ValidationError as e:
-        print("Invalid record:", e)
+    open: float = Field(alias="1. open")
+    high: float = Field(alias="2. high")
+    low: float = Field(alias="3. low")
+    close: float = Field(alias="4. close")
+    volume: int = Field(alias="5. volume")
