@@ -17,10 +17,11 @@ from validate import Validate
 
 df = None
 
+
 def extract(value):
     global df
 
-    url = URL.format(value,API_KEY)
+    url = URL.format(value, API_KEY)
     r = requests.get(url)
 
     data = r.json()
@@ -30,7 +31,7 @@ def extract(value):
 
     for date_key, row in time_series.items():
         try:
-            validate = Validate(date=date_key,**row)
+            validate = Validate(date=date_key, **row)
             validated_row.append(validate.model_dump())
         except ValidationError as e:
             print(e)
@@ -39,9 +40,9 @@ def extract(value):
 
     # validated_data = Validation(data)
     if df is None:
-        df = pd.DataFrame.from_dict(time_series, orient='index') # for the first time add
+        df = pd.DataFrame.from_dict(time_series, orient='index')  # for the first time add
     else:
-        df = pd.concat([df,data],ignore_index=True) # after just add other dataframes
+        df = pd.concat([df, data], ignore_index=True)  # after just add other dataframes
 
     ct = date.today()
     df.to_csv(f"extracted_data/{value}_{ct}.csv")

@@ -4,7 +4,7 @@ import os
 
 from datetime import datetime
 
-#TODO:
+# TODO:
 #   Create this variables in Settings py and import from that file.
 #   Refactor the current implementation into a DatabaseManager class
 #    that handles all database-related operations.
@@ -55,18 +55,18 @@ for file in filenames:
                 (symbol, date, open_price, high_price, low_price, close_price, volume, daily_change_percentage)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ''', row['symbol'], row['date'], row['open'], row['high'], row['low'], row['close'],
-                 row['volume'], row['daily_change_percentage'])
+                           row['volume'], row['daily_change_percentage'])
         except pyodbc.IntegrityError:
             pass
 
     conn.commit()
     print(f"Inserted data from {file}")
 
-
 # df_sql = pd.read_sql("SELECT * FROM stock_daily_data", conn)
 # df_sql.to_json("raw_data/stock_daily_data_export.json", orient="records", indent=4, date_format='iso')
 
 conn.close()
+
 
 class A:
     def __init__(self):
